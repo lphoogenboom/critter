@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+
+themeName=$1
+
+# Check if the input is empty
+if [ -z "$themeName" ]; then
+  echo "Usage: $0 themeName (no .yml extension)"
+  exit 1
+fi
+
+# Define the source and destination directories
+source_dir="$HOME/.config/alacritty/"
+destination_dir="$HOME/.config/alacritty/"
+
+# Build the full source and destination paths
+source_path="${source_dir}${themeName}.yml"
+destination_path="${destination_dir}currentTheme.yml"
+
+# Check if the source file exists
+if [ ! -e "$source_path" ]; then
+  echo "Input file not found: $source_path"
+  exit 1
+fi
+
+# Perform the copy operation
+cp "$source_path" "$destination_path"
+
+echo "Changed theme to $themeName"
