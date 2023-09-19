@@ -1,28 +1,61 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
-themeName=$1
+# Initialize variables with default values
+themeName=""
+sourceDir="${HOME}/.config/alacritty/themes/"
+terminalWidth=$(tput cols)
 
-# Check if the input is empty
-if [ -z "$themeName" ]; then
-  echo "Usage: $0 themeName (no .yml extension)"
-  exit 1
-fi
+# Use getopts to process flags
+while getopts ':s:l' opt; do
+    case "$opt" in
+    s)
+        # Set the 'themeName' variable to the value of the -s flag argument
+        themeName="$OPTARG"
 
-# Define the source and destination directories
-source_dir="$HOME/.config/alacritty/"
-destination_dir="$HOME/.config/alacritty/"
+        # Check if the input is empty
+        if [ -z "$themeName" ]; then
+            echo "Usage: $0 -s themeName (no .yml extension)"
+            exit 1
+        fi
 
-# Build the full source and destination paths
-source_path="${source_dir}${themeName}.yml"
-destination_path="${destination_dir}currentTheme.yml"
+        # Build the full source and destination paths
+        sourcePath="${sourceDir}${themeName}.yml"
+        destinationPath="${HOME}/.config/alacritty/activeTheme.yml"
 
-# Check if the source file exists
-if [ ! -e "$source_path" ]; then
-  echo "Input file not found: $source_path"
-  exit 1
-fi
+        # Check if the source file exists
+        if [ ! -e "$sourcePath" ]; then
+            echo "Input file not found: $sourcePath"
+            exit 1
+        fi
 
-# Perform the copy operation
-cp "$source_path" "$destination_path"
+        # Perform the copy operation
+        cp "$sourcePath" "$destinationPath"
 
-echo "Changed theme to $themeName"
+        echo "Changed theme to $themeName"
+        exit 0
+        ;;
+
+    l)
+        echo "Path to themes: $sourceDir"
+        # find "$sourceDir" -type f -name "*.yml" -exec sh -c 'basename "$0" .yml' {} \;
+        ls "$sourceDir"*.yml | xargs -I {} basename {} .yml | column -x -c $terminalWidth
+	exit 0  # Exit after listing files, no need to continue
+        ;;
+
+    # Handle unknown options
+    \?)
+        echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
+
+    # -s requires an argument
+    :)
+        echo "Option -$OPTARG requires an argument." >&2
+        exit 1
+        ;;
+    esac
+done
+
+# If we reach here, it means no valid flags were provided as arguments
+echo "Usage: $0 [-s themeName] [-l]"
+exit 1
